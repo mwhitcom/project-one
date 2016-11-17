@@ -112,7 +112,7 @@ function jambase(){
 	.done(function(response){
 		var results = response.Events;
 		addMusicEvents(results);
-		console.log(response);
+		// console.log(response);
 	});
 };
 
@@ -149,7 +149,10 @@ function quandl(){
 	var numResults = 10; //number
 	var addLimit = "limit=" + numResults;
 
-	var city = 10001;
+
+ // create a function that determines which type of call to make... if input is zip code use zipcode if input is city use the function with city code... //
+
+	var cityCode = 10001;
 	var format = ".json?"
 
 	var areaType = {
@@ -165,7 +168,7 @@ function quandl(){
 	};
 
 	var fullQueryZipcode = houseQueryUrl + areaType.zipcode + zipcode + housingType.medianRent + format + houseKey;
-	var fullQueryCity = houseQueryUrl + areaType.city + city + housingType.medianRent + format + houseKey;
+	var fullQueryCity = houseQueryUrl + areaType.city + cityCode + housingType.medianRent + format + houseKey;
 
 	// console.log(fullQueryZipcode);
 
@@ -214,8 +217,8 @@ function googleMap () {
 	newMap.attr("src", fullMapUrl);
 	$(".googleMapDiv").append(newMap);
 
-	console.log(userInput);
-	console.log(fullMapUrl);
+	// console.log(userInput);
+	// console.log(fullMapUrl);
 };
 
 function printPastSearches(){
@@ -251,7 +254,32 @@ function logDisplay(){
 //     console.log(uluru);
 // };
 
+function checkInput(userInput){
 
+	var alphaExp = /^[a-zA-Z ]+$/;
+	var numericExpression = /^[0-9]+$/;
+	if(userInput.match(alphaExp)){
+		getCityCode(userInput);
+	} else if(userInput.match(numericExpression)){
+		
+	}
+};
+
+
+function getCityCode (userInput) {
+	
+	database.ref().child("-KWklNSHU4YBCKzFREu7").once('value').then(function(snapShot){ 
+
+		var inputCityCode = snapShot.val().find(function(cityCode){
+    		if(cityCode.City === userInput){
+     		 return cityCode;
+    		}
+		});
+
+			console.log(inputCityCode.Code);
+
+	});
+};
 
 
 
@@ -261,12 +289,15 @@ $("#citySearch").on("submit", function() {
 	$(".mdl-cell--6-col").show();
 	$("#search").css("margin-top", "0");
 	userInput = $("#location").val().trim();
+	
 	autoComplete();
 	$("#location").val("");
 	jambase();
 	quandl();
 	googleMap();
 	printPastSearches();
+	checkInput(userInput);
+	return false;
 	// initMap();
 });
 
